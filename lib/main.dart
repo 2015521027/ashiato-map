@@ -44,7 +44,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final Store _store = Store();
-  late final Future<List<PrefShape>> _shapesFuture = loadJapanMap();
+  late final Future<JapanMapData> _mapFuture = loadJapanMap();
   bool _listMode = false;
 
   @override
@@ -102,8 +102,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildMap() {
-    return FutureBuilder<List<PrefShape>>(
-      future: _shapesFuture,
+    return FutureBuilder<JapanMapData>(
+      future: _mapFuture,
       builder: (context, snap) {
         if (snap.hasError) {
           return Center(child: Text('地図の読み込みに失敗しました: ${snap.error}'));
@@ -115,7 +115,7 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Expanded(
               child: JapanMap(
-                shapes: snap.data!,
+                data: snap.data!,
                 rankByCode: _ranks,
                 onPrefTap: _openPref,
               ),
@@ -292,29 +292,33 @@ class _Legend extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 12,
-      runSpacing: 4,
-      alignment: WrapAlignment.center,
-      children: [
-        for (final r in kRanks)
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 12,
-                height: 12,
-                decoration: BoxDecoration(
-                  color: r.color,
-                  borderRadius: BorderRadius.circular(3),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Wrap(
+        spacing: 16,
+        runSpacing: 8,
+        alignment: WrapAlignment.center,
+        children: [
+          for (final r in kRanks)
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 22,
+                  height: 22,
+                  decoration: BoxDecoration(
+                    color: r.color,
+                    borderRadius: BorderRadius.circular(5),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 4),
-              Text('${r.value} ${r.label}',
-                  style: const TextStyle(fontSize: 11)),
-            ],
-          ),
-      ],
+                const SizedBox(width: 6),
+                Text('${r.value} ${r.label}',
+                    style: const TextStyle(
+                        fontSize: 20, fontWeight: FontWeight.w500)),
+              ],
+            ),
+        ],
+      ),
     );
   }
 }

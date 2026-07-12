@@ -14,13 +14,20 @@ class PrefShape {
   PrefShape(this.code, this.path);
 }
 
+/// 地図データ一式(都道府県パス+離島と本土の区切り線)
+class JapanMapData {
+  final List<PrefShape> shapes;
+  final Path boundaries;
+  JapanMapData(this.shapes, this.boundaries);
+}
+
 final RegExp _translateRe =
     RegExp(r'translate\(\s*([-\d.]+)[,\s]+([-\d.]+)\s*\)');
 final RegExp _matrixRe = RegExp(r'matrix\(([^)]+)\)');
 
 /// assets/japan.svg(geolonia/japanese-prefectures)を読み込み、
 /// 都道府県ごとの描画・タップ判定用 Path に変換する。
-Future<List<PrefShape>> loadJapanMap() async {
+Future<JapanMapData> loadJapanMap() async {
   final text = await rootBundle.loadString('assets/japan.svg');
   final doc = XmlDocument.parse(text);
 
@@ -85,19 +92,33 @@ Future<List<PrefShape>> loadJapanMap() async {
     if (outer != null) combined = combined.transform(outer);
     shapes.add(PrefShape(code, combined));
   }
-  return shapes;
+
+  // 離島(沖縄・奄美など)と本土を区切る線
+  var boundaries = Path();
+  for (final line in doc.findAllElements('line')) {
+    final x1 = double.tryParse(line.getAttribute('x1') ?? '');
+    final y1 = double.tryParse(line.getAttribute('y1') ?? '');
+    final x2 = double.tryParse(line.getAttribute('x2') ?? '');
+    final y2 = double.tryParse(line.getAttribute('y2') ?? '');
+    if (x1 == null || y1 == null || x2 == null || y2 == null) continue;
+    boundaries.moveTo(x1, y1);
+    boundaries.lineTo(x2, y2);
+  }
+  if (outer != null) boundaries = boundaries.transform(outer);
+
+  return JapanMapData(shapes, boundaries);
 }
 
 /// 日本地図ウィジェット。ランクに応じて塗り分け、タップで都道府県を通知する。
 /// ピンチズーム対応(小さい県は拡大してタップできる)。
 class JapanMap extends StatelessWidget {
-  final List<PrefShape> shapes;
+  final JapanMapData data;
   final Map<int, int> rankByCode;
   final ValueChanged<int> onPrefTap;
 
   const JapanMap({
     super.key,
-    required this.shapes,
+    required this.data,
     required this.rankByCode,
     required this.onPrefTap,
   });
@@ -117,7 +138,7 @@ class JapanMap extends StatelessWidget {
               behavior: HitTestBehavior.opaque,
               onTapUp: (d) {
                 final p = d.localPosition / scale;
-                for (final s in shapes.reversed) {
+                for (final s in data.shapes.reversed) {
                   if (s.path.contains(p)) {
                     onPrefTap(s.code);
                     return;
@@ -127,7 +148,7 @@ class JapanMap extends StatelessWidget {
               child: CustomPaint(
                 size: Size(c.maxWidth, c.maxWidth),
                 painter: _JapanMapPainter(
-                  shapes: shapes,
+                  data: data,
                   rankByCode: rankByCode,
                   scale: scale,
                 ),
@@ -141,12 +162,12 @@ class JapanMap extends StatelessWidget {
 }
 
 class _JapanMapPainter extends CustomPainter {
-  final List<PrefShape> shapes;
+  final JapanMapData data;
   final Map<int, int> rankByCode;
   final double scale;
 
   _JapanMapPainter({
-    required this.shapes,
+    required this.data,
     required this.rankByCode,
     required this.scale,
   });
@@ -158,18 +179,28 @@ class _JapanMapPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..color = const Color(0xFF546E7A)
       ..strokeWidth = 1.2;
-    for (final s in shapes) {
+    for (final s in data.shapes) {
       final fill = Paint()
         ..style = PaintingStyle.fill
         ..color = rankDef(rankByCode[s.code] ?? 0).color;
       canvas.drawPath(s.path, fill);
       canvas.drawPath(s.path, stroke);
     }
+    // 離島と本土の区切り線(灰色の破線)
+    final boundaryPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..color = const Color(0xFF9E9E9E)
+      ..strokeWidth = 3;
+    canvas.drawPath(
+      dashPath(
+        data.boundaries,
+        dashArray: CircularIntervalList<double>([14, 10]),
+      ),
+      boundaryPaint,
+    );
   }
 
   @override
   bool shouldRepaint(covariant _JapanMapPainter old) =>
-      old.rankByCode != rankByCode ||
-      old.shapes != shapes ||
-      old.scale != scale;
+      old.rankByCode != rankByCode || old.data != data || old.scale != scale;
 }
