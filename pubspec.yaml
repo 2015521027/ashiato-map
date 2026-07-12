@@ -1,5 +1,5 @@
 name: keiken_memo
-description: "経県値スタイルの都道府県訪問記録+訪問メモアプリ"
+description: "足跡マップ - 日本地図を塗りつぶして旅行・出張の記録を残すアプリ"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev

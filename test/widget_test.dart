@@ -9,7 +9,7 @@ void main() {
     await tester.pumpWidget(const KeikenApp());
     await tester.pump();
 
-    expect(find.text('経県メモ'), findsOneWidget);
+    expect(find.text('足跡マップ'), findsOneWidget);
     expect(find.text('地図'), findsOneWidget);
     expect(find.text('一覧'), findsOneWidget);
   });

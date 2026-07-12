@@ -18,7 +18,7 @@ class KeikenApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: '経県メモ',
+      title: '足跡マップ',
       theme: ThemeData(
         colorSchemeSeed: const Color(0xFF00695C),
         useMaterial3: true,
@@ -62,7 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
       listenable: _store,
       builder: (context, _) => Scaffold(
         appBar: AppBar(
-          title: const Text('経県メモ'),
+          title: const Text('足跡マップ'),
           actions: [
             PopupMenuButton<String>(
               onSelected: _onMenu,
@@ -186,10 +186,10 @@ class _HomeScreenState extends State<HomeScreen> {
       case 'about':
         showAboutDialog(
           context: context,
-          applicationName: '経県メモ',
+          applicationName: '足跡マップ',
           applicationVersion: '1.0.0',
           children: const [
-            Text('都道府県ごとの経県ランクと訪問記録を残すアプリ。'),
+            Text('行った都道府県を塗りつぶして、旅の記録を残すアプリ。'),
             SizedBox(height: 8),
             Text('日本地図: geolonia/japanese-prefectures(MIT License)'),
           ],
@@ -269,7 +269,7 @@ class _ScoreHeader extends StatelessWidget {
               TextSpan(
                 children: [
                   const TextSpan(
-                    text: '経県値  ',
+                    text: '足跡スコア  ',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   TextSpan(
@@ -289,7 +289,7 @@ class _ScoreHeader extends StatelessWidget {
             ),
             const Spacer(),
             Text(
-              '経県 $visited / 47',
+              '塗りつぶし $visited / 47',
               style: const TextStyle(fontWeight: FontWeight.w600),
             ),
           ],

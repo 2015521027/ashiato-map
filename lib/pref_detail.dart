@@ -29,7 +29,7 @@ class PrefDetailPage extends StatelessWidget {
           body: ListView(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
             children: [
-              Text('経県ランク', style: Theme.of(context).textTheme.titleMedium),
+              Text('ランク', style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
