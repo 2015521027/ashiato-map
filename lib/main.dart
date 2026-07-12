@@ -20,8 +20,7 @@ class KeikenApp extends StatelessWidget {
     return MaterialApp(
       title: '経県メモ',
       theme: ThemeData(
-        colorSchemeSeed: const Color(0xFFE07A2F),
-        scaffoldBackgroundColor: const Color(0xFFF7F1E3),
+        colorSchemeSeed: const Color(0xFF00695C),
         useMaterial3: true,
       ),
       locale: const Locale('ja'),
@@ -255,12 +254,12 @@ class _ScoreHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const brown = Color(0xFF5D4013);
+    final scheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFFF9BE4B),
+          color: scheme.primaryContainer,
           borderRadius: BorderRadius.circular(24),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
@@ -271,21 +270,19 @@ class _ScoreHeader extends StatelessWidget {
                 children: [
                   const TextSpan(
                     text: '経県値  ',
-                    style: TextStyle(
-                        color: brown, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   TextSpan(
                     text: '$score',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 34,
                       fontWeight: FontWeight.bold,
-                      color: brown,
+                      color: scheme.primary,
                     ),
                   ),
                   const TextSpan(
                     text: ' 点',
-                    style: TextStyle(
-                        color: brown, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
@@ -293,8 +290,7 @@ class _ScoreHeader extends StatelessWidget {
             const Spacer(),
             Text(
               '経県 $visited / 47',
-              style: const TextStyle(
-                  color: brown, fontWeight: FontWeight.w600),
+              style: const TextStyle(fontWeight: FontWeight.w600),
             ),
           ],
         ),
@@ -317,7 +313,7 @@ class _LegendVertical extends StatelessWidget {
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF6B5E4F),
+            color: Color(0xFF546E7A),
           ),
         ),
         const SizedBox(height: 4),
