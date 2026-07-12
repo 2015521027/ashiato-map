@@ -1,4 +1,4 @@
-package com.shiotani.keiken_memo
+package com.shiotani.ashiato_map
 
 import io.flutter.embedding.android.FlutterActivity
 
