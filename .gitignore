@@ -46,3 +46,6 @@ app.*.map.json
 
 # Claude Code personal settings
 .claude/settings.local.json
+
+# アイコン生成の中間SVG(再生成可能)
+tool/out/
