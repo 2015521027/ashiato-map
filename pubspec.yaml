@@ -59,12 +59,12 @@ flutter_launcher_icons:
   android: true
   ios: false
   image_path: "assets/icon/icon_full.png"
-  adaptive_icon_background: "#173A56"
+  adaptive_icon_background: "#F6F9F8"
   adaptive_icon_foreground: "assets/icon/icon_fg.png"
   web:
     generate: true
     image_path: "assets/icon/icon_full.png"
-    background_color: "#173A56"
+    background_color: "#F6F9F8"
     theme_color: "#00695C"
 
 # For information on the generic Dart part of this file, see the
