@@ -27,4 +27,5 @@ $flutter = 'C:\Users\w5521\dev\tools\flutter\bin\flutter.bat'
 ## クレジット
 
 - 日本地図 SVG: [geolonia/japanese-prefectures](https://github.com/geolonia/japanese-prefectures)(MIT License)
+- 足跡アイコン: [Material Design Icons](https://pictogrammers.com/library/mdi/)(Apache License 2.0)
 - 経県値の考え方: [経県値](https://uub.jp/kkn/)に着想

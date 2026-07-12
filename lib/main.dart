@@ -194,6 +194,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Text('行った都道府県を塗りつぶして、旅の記録を残すアプリ。'),
             SizedBox(height: 8),
             Text('日本地図: geolonia/japanese-prefectures(MIT License)'),
+            Text('足跡アイコン: Material Design Icons(Apache License 2.0)'),
           ],
         );
         break;
