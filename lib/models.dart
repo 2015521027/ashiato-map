@@ -37,13 +37,17 @@ class Visit {
   String title;
   String memo;
 
+  /// 添付写真のID一覧(実体は PhotoStore が管理)
+  List<String> photos;
+
   Visit({
     required this.id,
     required this.date,
     required this.category,
     required this.title,
     required this.memo,
-  });
+    List<String>? photos,
+  }) : photos = photos ?? [];
 
   String get dateLabel =>
       '${date.year}/${date.month.toString().padLeft(2, '0')}/${date.day.toString().padLeft(2, '0')}';
@@ -55,6 +59,7 @@ class Visit {
         'category': category,
         'title': title,
         'memo': memo,
+        'photos': photos,
       };
 
   factory Visit.fromJson(Map<String, dynamic> j) => Visit(
@@ -63,6 +68,7 @@ class Visit {
         category: (j['category'] as String?) ?? 'その他',
         title: (j['title'] as String?) ?? '',
         memo: (j['memo'] as String?) ?? '',
+        photos: ((j['photos'] as List?) ?? []).cast<String>(),
       );
 }
 

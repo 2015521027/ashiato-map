@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'models.dart';
+import 'photo_store.dart';
 
 /// アプリ全体のデータ保持と永続化(shared_preferences に JSON 文字列で保存)
 class Store extends ChangeNotifier {
@@ -74,7 +75,14 @@ class Store extends ChangeNotifier {
   }
 
   void deleteVisit(int code, String visitId) {
-    prefs[code]!.visits.removeWhere((v) => v.id == visitId);
+    final visits = prefs[code]!.visits;
+    final i = visits.indexWhere((v) => v.id == visitId);
+    if (i >= 0) {
+      for (final photoId in visits[i].photos) {
+        PhotoStore.instance.delete(photoId);
+      }
+      visits.removeAt(i);
+    }
     _save();
     notifyListeners();
   }

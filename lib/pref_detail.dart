@@ -1,6 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'models.dart';
+import 'photo_store.dart';
 import 'store.dart';
 
 /// 都道府県詳細ページ: 経県ランクの設定と訪問記録(子レコード)の一覧・追加・編集・削除
@@ -86,7 +89,15 @@ class PrefDetailPage extends StatelessWidget {
         ),
       ),
     );
-    if (result != null) store.upsertVisit(code, result);
+    if (result != null) {
+      // 編集で外された写真の実体を削除してから保存する
+      for (final id in original?.photos ?? const <String>[]) {
+        if (!result.photos.contains(id)) {
+          PhotoStore.instance.delete(id);
+        }
+      }
+      store.upsertVisit(code, result);
+    }
   }
 
   Future<void> _confirmDelete(BuildContext context, Visit v) async {
@@ -95,7 +106,8 @@ class PrefDetailPage extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('記録を削除'),
-        content: Text('「$label」を削除しますか?'),
+        content: Text(
+            '「$label」を削除しますか?${v.photos.isNotEmpty ? '\n添付写真${v.photos.length}枚も削除されます。' : ''}'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -177,15 +189,119 @@ class _VisitCard extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 4, right: 8),
                   child: Text(visit.memo),
                 ),
+              if (visit.photos.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: SizedBox(
+                    height: 64,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: [
+                        for (final id in visit.photos)
+                          Padding(
+                            padding: const EdgeInsets.only(right: 6),
+                            child: GestureDetector(
+                              onTap: () => _showPhoto(context, id),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: _PhotoThumb(id: id, size: 64),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
             ],
           ),
         ),
       ),
     );
   }
+
+  Future<void> _showPhoto(BuildContext context, String id) async {
+    final bytes = await PhotoStore.instance.load(id);
+    if (bytes == null || !context.mounted) return;
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        insetPadding: const EdgeInsets.all(8),
+        backgroundColor: Colors.black,
+        child: Stack(
+          children: [
+            InteractiveViewer(
+              maxScale: 6,
+              child: Center(child: Image.memory(bytes)),
+            ),
+            Positioned(
+              top: 4,
+              right: 4,
+              child: IconButton(
+                icon: const Icon(Icons.close, color: Colors.white),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
-/// 訪問記録の追加・編集フォーム
+/// PhotoStore から読み込むサムネイル
+class _PhotoThumb extends StatelessWidget {
+  final String id;
+  final double size;
+
+  const _PhotoThumb({required this.id, required this.size});
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<Uint8List?>(
+      future: PhotoStore.instance.load(id),
+      builder: (context, snap) {
+        if (snap.connectionState != ConnectionState.done) {
+          return Container(
+            width: size,
+            height: size,
+            color: Colors.grey[200],
+            child: const Center(
+              child: SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ),
+          );
+        }
+        final bytes = snap.data;
+        if (bytes == null) {
+          return Container(
+            width: size,
+            height: size,
+            color: Colors.grey[300],
+            child: const Icon(Icons.broken_image, color: Colors.grey),
+          );
+        }
+        return Image.memory(
+          bytes,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+          gaplessPlayback: true,
+        );
+      },
+    );
+  }
+}
+
+class _PendingPhoto {
+  final String? id; // 既存写真ならID、新規追加なら null
+  final Uint8List bytes;
+  _PendingPhoto({this.id, required this.bytes});
+}
+
+/// 訪問記録の追加・編集フォーム(写真添付対応)
 class VisitEditPage extends StatefulWidget {
   final String prefName;
   final Visit? original;
@@ -203,6 +319,33 @@ class _VisitEditPageState extends State<VisitEditPage> {
       TextEditingController(text: widget.original?.title ?? '');
   late final TextEditingController _memoCtrl =
       TextEditingController(text: widget.original?.memo ?? '');
+
+  List<_PendingPhoto> _photos = [];
+  bool _loadingPhotos = false;
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final existing = widget.original?.photos ?? const <String>[];
+    if (existing.isNotEmpty) {
+      _loadingPhotos = true;
+      _loadExistingPhotos(existing);
+    }
+  }
+
+  Future<void> _loadExistingPhotos(List<String> ids) async {
+    final list = <_PendingPhoto>[];
+    for (final id in ids) {
+      final bytes = await PhotoStore.instance.load(id);
+      if (bytes != null) list.add(_PendingPhoto(id: id, bytes: bytes));
+    }
+    if (!mounted) return;
+    setState(() {
+      _photos = list;
+      _loadingPhotos = false;
+    });
+  }
 
   @override
   void dispose() {
@@ -222,7 +365,16 @@ class _VisitEditPageState extends State<VisitEditPage> {
             ? '${widget.prefName}の記録を追加'
             : '記録を編集'),
         actions: [
-          TextButton(onPressed: _save, child: const Text('保存')),
+          TextButton(
+            onPressed: _saving ? null : _save,
+            child: _saving
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text('保存'),
+          ),
         ],
       ),
       body: ListView(
@@ -273,6 +425,66 @@ class _VisitEditPageState extends State<VisitEditPage> {
               alignLabelWithHint: true,
             ),
           ),
+          const SizedBox(height: 16),
+          Text('写真', style: Theme.of(context).textTheme.titleSmall),
+          const SizedBox(height: 8),
+          if (_loadingPhotos)
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (var i = 0; i < _photos.length; i++)
+                  Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.memory(
+                          _photos[i].bytes,
+                          width: 84,
+                          height: 84,
+                          fit: BoxFit.cover,
+                          gaplessPlayback: true,
+                        ),
+                      ),
+                      Positioned(
+                        top: 2,
+                        right: 2,
+                        child: GestureDetector(
+                          onTap: () => setState(() => _photos.removeAt(i)),
+                          child: Container(
+                            decoration: const BoxDecoration(
+                              color: Colors.black54,
+                              shape: BoxShape.circle,
+                            ),
+                            padding: const EdgeInsets.all(2),
+                            child: const Icon(Icons.close,
+                                size: 16, color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                InkWell(
+                  onTap: _addPhotos,
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    width: 84,
+                    height: 84,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.grey[400]!),
+                    ),
+                    child: Icon(Icons.add_a_photo, color: Colors.grey[600]),
+                  ),
+                ),
+              ],
+            ),
         ],
       ),
     );
@@ -288,7 +500,71 @@ class _VisitEditPageState extends State<VisitEditPage> {
     if (picked != null) setState(() => _date = picked);
   }
 
-  void _save() {
+  Future<void> _addPhotos() async {
+    // Webはファイル選択のみ。モバイルはギャラリー/カメラを選ばせる。
+    ImageSource source = ImageSource.gallery;
+    if (!kIsWeb) {
+      final picked = await showModalBottomSheet<ImageSource>(
+        context: context,
+        builder: (context) => SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('ギャラリーから選ぶ'),
+                onTap: () => Navigator.pop(context, ImageSource.gallery),
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_camera),
+                title: const Text('カメラで撮る'),
+                onTap: () => Navigator.pop(context, ImageSource.camera),
+              ),
+            ],
+          ),
+        ),
+      );
+      if (picked == null) return;
+      source = picked;
+    }
+
+    final picker = ImagePicker();
+    final files = <XFile>[];
+    try {
+      if (source == ImageSource.gallery) {
+        files.addAll(await picker.pickMultiImage(
+            maxWidth: 1600, imageQuality: 80));
+      } else {
+        final shot = await picker.pickImage(
+            source: ImageSource.camera, maxWidth: 1600, imageQuality: 80);
+        if (shot != null) files.add(shot);
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('写真の取得に失敗しました: $e')),
+      );
+      return;
+    }
+
+    for (final f in files) {
+      var bytes = await f.readAsBytes();
+      // ピッカーが縮小してくれなかった場合の保険(Web等)
+      if (bytes.length > 400 * 1024) {
+        bytes = await compute(downscaleImage, bytes);
+      }
+      _photos.add(_PendingPhoto(bytes: bytes));
+    }
+    if (mounted && files.isNotEmpty) setState(() {});
+  }
+
+  Future<void> _save() async {
+    setState(() => _saving = true);
+    final ids = <String>[];
+    for (final p in _photos) {
+      ids.add(p.id ?? await PhotoStore.instance.save(p.bytes));
+    }
+    if (!mounted) return;
     Navigator.pop(
       context,
       Visit(
@@ -298,6 +574,7 @@ class _VisitEditPageState extends State<VisitEditPage> {
         category: _category,
         title: _titleCtrl.text.trim(),
         memo: _memoCtrl.text.trim(),
+        photos: ids,
       ),
     );
   }

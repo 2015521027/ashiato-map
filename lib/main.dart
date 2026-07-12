@@ -173,7 +173,8 @@ class _HomeScreenState extends State<HomeScreen> {
         await Clipboard.setData(ClipboardData(text: _store.exportJson()));
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('バックアップJSONをクリップボードにコピーしました')),
+          const SnackBar(
+              content: Text('バックアップJSONをコピーしました(写真は含まれません)')),
         );
         break;
       case 'import':
