@@ -20,7 +20,8 @@ class KeikenApp extends StatelessWidget {
     return MaterialApp(
       title: '経県メモ',
       theme: ThemeData(
-        colorSchemeSeed: const Color(0xFF00695C),
+        colorSchemeSeed: const Color(0xFFE07A2F),
+        scaffoldBackgroundColor: const Color(0xFFF7F1E3),
         useMaterial3: true,
       ),
       locale: const Locale('ja'),
@@ -111,17 +112,20 @@ class _HomeScreenState extends State<HomeScreen> {
         if (!snap.hasData) {
           return const Center(child: CircularProgressIndicator());
         }
-        return Column(
+        return Stack(
           children: [
-            Expanded(
+            Positioned.fill(
               child: JapanMap(
                 data: snap.data!,
                 rankByCode: _ranks,
                 onPrefTap: _openPref,
               ),
             ),
-            const _Legend(),
-            const SizedBox(height: 8),
+            const Positioned(
+              left: 16,
+              top: 8,
+              child: IgnorePointer(child: _LegendVertical()),
+            ),
           ],
         );
       },
@@ -251,74 +255,120 @@ class _ScoreHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    const brown = Color(0xFF5D4013);
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-      child: Card(
-        elevation: 0,
-        color: scheme.primaryContainer,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          child: Row(
-            children: [
-              Text.rich(
-                TextSpan(
-                  children: [
-                    const TextSpan(text: '経県値  '),
-                    TextSpan(
-                      text: '$score',
-                      style: TextStyle(
-                        fontSize: 36,
-                        fontWeight: FontWeight.bold,
-                        color: scheme.primary,
-                      ),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFFF9BE4B),
+          borderRadius: BorderRadius.circular(24),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+        child: Row(
+          children: [
+            Text.rich(
+              TextSpan(
+                children: [
+                  const TextSpan(
+                    text: '経県値  ',
+                    style: TextStyle(
+                        color: brown, fontWeight: FontWeight.bold),
+                  ),
+                  TextSpan(
+                    text: '$score',
+                    style: const TextStyle(
+                      fontSize: 34,
+                      fontWeight: FontWeight.bold,
+                      color: brown,
                     ),
-                    const TextSpan(text: ' 点'),
-                  ],
-                ),
+                  ),
+                  const TextSpan(
+                    text: ' 点',
+                    style: TextStyle(
+                        color: brown, fontWeight: FontWeight.bold),
+                  ),
+                ],
               ),
-              const Spacer(),
-              Text('経県 $visited / 47'),
-            ],
-          ),
+            ),
+            const Spacer(),
+            Text(
+              '経県 $visited / 47',
+              style: const TextStyle(
+                  color: brown, fontWeight: FontWeight.w600),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class _Legend extends StatelessWidget {
-  const _Legend();
+class _LegendVertical extends StatelessWidget {
+  const _LegendVertical();
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: Wrap(
-        spacing: 16,
-        runSpacing: 8,
-        alignment: WrapAlignment.center,
-        children: [
-          for (final r in kRanks)
-            Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Text(
+          '点数',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF6B5E4F),
+          ),
+        ),
+        const SizedBox(height: 4),
+        for (final r in kRanks)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 3),
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  width: 22,
-                  height: 22,
+                  width: 28,
+                  height: 28,
+                  alignment: Alignment.center,
                   decoration: BoxDecoration(
                     color: r.color,
-                    borderRadius: BorderRadius.circular(5),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 2,
+                        offset: Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    '${r.value}',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: (r.value == 3 || r.value == 0)
+                          ? Colors.black87
+                          : Colors.white,
+                    ),
                   ),
                 ),
-                const SizedBox(width: 6),
-                Text('${r.value} ${r.label}',
-                    style: const TextStyle(
-                        fontSize: 20, fontWeight: FontWeight.w500)),
+                const SizedBox(width: 8),
+                Text(
+                  r.label,
+                  style: const TextStyle(
+                      fontSize: 17, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  r.desc,
+                  style: TextStyle(fontSize: 15, color: Colors.grey[800]),
+                ),
               ],
             ),
-        ],
-      ),
+          ),
+      ],
     );
   }
 }

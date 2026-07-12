@@ -177,7 +177,7 @@ class _JapanMapPainter extends CustomPainter {
     canvas.scale(scale);
     final stroke = Paint()
       ..style = PaintingStyle.stroke
-      ..color = const Color(0xFF546E7A)
+      ..color = const Color(0xFF6B5E4F)
       ..strokeWidth = 1.2;
     for (final s in data.shapes) {
       final fill = Paint()

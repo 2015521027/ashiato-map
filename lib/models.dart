@@ -10,12 +10,12 @@ class RankDef {
 }
 
 const List<RankDef> kRanks = [
-  RankDef(5, '居住', '住んだ(住んでいる)', Color(0xFFE53935)),
+  RankDef(5, '居住', '住んだ', Color(0xFFE53935)),
   RankDef(4, '宿泊', '泊まった', Color(0xFFFB8C00)),
   RankDef(3, '訪問', '歩いた', Color(0xFFFDD835)),
-  RankDef(2, '接地', '降り立った(乗換など)', Color(0xFF43A047)),
+  RankDef(2, '接地', '降り立った', Color(0xFF43A047)),
   RankDef(1, '通過', '通過した', Color(0xFF42A5F5)),
-  RankDef(0, '未踏', '行ったことがない', Color(0xFFCFD8DC)),
+  RankDef(0, '未踏', '行ってない', Color(0xFFCFD8DC)),
 ];
 
 RankDef rankDef(int value) => kRanks.firstWhere((r) => r.value == value);
