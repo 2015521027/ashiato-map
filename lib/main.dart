@@ -84,11 +84,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 ButtonSegment(
                     value: false,
                     icon: Icon(Icons.map_outlined),
-                    label: Text('地図')),
+                    label: Text('地図',
+                        softWrap: false, overflow: TextOverflow.visible)),
                 ButtonSegment(
                     value: true,
                     icon: Icon(Icons.list),
-                    label: Text('一覧')),
+                    label: Text('一覧',
+                        softWrap: false, overflow: TextOverflow.visible)),
               ],
               selected: {_listMode},
               onSelectionChanged: (s) => setState(() => _listMode = s.first),

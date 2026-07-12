@@ -3,7 +3,7 @@
     "short_name": "足跡マップ",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#FFFFFF",
+    "background_color": "#173A56",
     "theme_color": "#00695C",
     "description": "行った都道府県を塗りつぶして、旅行・出張の思い出をメモと写真で残せる記録アプリ",
     "orientation": "portrait-primary",
