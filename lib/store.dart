@@ -14,7 +14,7 @@ class Store extends ChangeNotifier {
     for (final code in kPrefNames.keys) code: PrefRecord(),
   };
 
-  /// 経県値(全都道府県のランク合計。最大 235 点)
+  /// 足跡スコア(全都道府県のランク合計。最大 235 点)
   int get score => prefs.values.fold(0, (sum, p) => sum + p.rank);
 
   int get visitedCount => prefs.values.where((p) => p.rank > 0).length;

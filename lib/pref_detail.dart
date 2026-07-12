@@ -6,7 +6,7 @@ import 'models.dart';
 import 'photo_store.dart';
 import 'store.dart';
 
-/// 都道府県詳細ページ: 経県ランクの設定と訪問記録(子レコード)の一覧・追加・編集・削除
+/// 都道府県詳細ページ: ランクの設定と訪問記録(子レコード)の一覧・追加・編集・削除
 class PrefDetailPage extends StatelessWidget {
   final int code;
   final Store store;

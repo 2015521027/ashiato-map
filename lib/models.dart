@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// 経県値ランク定義(値・名称・説明・地図の塗り色)。定義はこのファイルに集約する。
+/// ランク定義(値・名称・説明・地図の塗り色)。定義はこのファイルに集約する。
 class RankDef {
   final int value;
   final String label;

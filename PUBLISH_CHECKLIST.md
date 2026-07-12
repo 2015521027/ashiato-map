@@ -1,42 +1,43 @@
 # 公開チェックリスト(足跡マップ)
 
-## あなたにしかできないこと(アカウント系)
+## 完了済み ✅
 
-- [ ] **Google Play Console 開発者登録**: https://play.google.com/console
-  - Google アカウントで登録、登録料 $25(買い切り)、本人確認書類が必要
-  - 個人名義で登録可(開発者名はストアに公開される。本名以外も設定可)
-- [ ] **問い合わせ用メールアドレスの決定**(ストアに公開される。個人用 Gmail 推奨)
-- [ ] **GitHub 認証**(PWA 公開用): PowerShell で `gh auth login` を実行してブラウザ認証
-  - 完了したら Claude に「GitHub 認証したよ」と言えば PWA 公開まで自動でやります
+- [x] Google Play Console 開発者登録($25)
+- [x] 問い合わせ用メールアドレスの決定
+- [x] リリース署名鍵の生成と署名設定(`android/upload-keystore.jks`)
+- [x] AAB ビルド: `build\app\outputs\bundle\release\app-release.aab`
+- [x] アプリアイコン(本採用: 1足+輪郭線版/予備: `store_assets/icon_backup_*.png`)
+- [x] ストア用アイコン 512px: `store_assets/icon_512.png`
+- [x] 宣伝画像 1024×500: `store_assets/feature_graphic.png`
+- [x] ストア説明文: `store_assets/store_listing.md`(コピペ用)
+- [x] スクリーンショット(スマホで撮影済みの3枚を使用)
+- [x] GitHub 公開: https://github.com/2015521027/ashiato-map
+- [x] Web版(PWA)公開: https://2015521027.github.io/ashiato-map/
+- [x] プライバシーポリシー公開: https://2015521027.github.io/ashiato-map/privacy.html
+- [x] 「経県値」表記の排除(アプリ名: 足跡マップ/スコア名: 足跡スコア)
 
-## Claude が準備済み
+## 残タスク
 
-- [x] リリース署名鍵(`android/upload-keystore.jks`)+ 設定
-- [x] AAB ビルド設定(Play 提出用形式)
-- [x] プライバシーポリシー文面(`web/privacy.html`。PWA 公開と同時に URL が発行される)
-- [x] 「経県値」表記の排除(アプリ名: 足跡マップ / スコア名: 足跡スコア)
+- [ ] Play Console でアプリ作成 → セットアップ項目の入力(`store_listing.md` からコピペ)
+- [ ] AAB アップロード(製品版 → 新しいリリースを作成)
+- [ ] 審査に送信
+- [ ] (求められた場合)クローズドテスト要件への対応: 新規個人アカウントは
+      「14日以上・テスター20人以上」のテスト実績が必要になることがある
 
 ## ⚠️ 最重要: 署名鍵のバックアップ
 
 `android/upload-keystore.jks` と `android/key.properties` の2ファイルを
-**USB メモリや個人のクラウドなど、PC 以外の場所に必ずバックアップしてください。**
-紛失すると、公開後のアプリを二度と更新できなくなります(Git には含まれません)。
-
-## 残タスク(Claude ができること)
-
-- [ ] アプリアイコンのデザイン(現在 Flutter 標準のまま。候補を作って選んでもらう)
-- [ ] ストア掲載素材: スクリーンショット数枚、宣伝画像 1024×500、アイコン 512×512
-- [ ] ストア説明文(タイトル: 足跡マップ - 日本旅行の記録・塗りつぶし / 短い説明 / 詳しい説明)
-- [ ] PWA を GitHub Pages に公開(↑の gh auth 後)
+**USB メモリや個人のクラウドなど、PC 以外の場所に必ずバックアップすること。**
+紛失すると、公開後のアプリを二度と更新できない(Git には含まれない)。
 
 ## Play Console 提出時の入力メモ
 
-| 項目 | 内容 |
+| 項目 | 値 |
 |---|---|
 | アプリ名 | 足跡マップ - 日本旅行の記録・塗りつぶし |
 | カテゴリ | 旅行&地域 |
-| 料金 | 無料 |
-| 広告 | なし |
-| データセーフティ | データ収集なし・共有なし(全データ端末内保存) |
-| コンテンツレーティング | 全年齢(質問票で暴力・課金等すべて「なし」) |
+| 料金 | 無料/広告なし |
+| プライバシーポリシーURL | https://2015521027.github.io/ashiato-map/privacy.html |
+| データセーフティ | 収集なし・共有なし(全データ端末内保存) |
+| コンテンツレーティング | 質問票すべて「なし」→ 全年齢想定 |
 | 提出ファイル | `build\app\outputs\bundle\release\app-release.aab` |
